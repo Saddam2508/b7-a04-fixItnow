@@ -4,7 +4,7 @@ import { prisma } from "../../lib/prisma";
 import { RegisterUserPayload } from "./user.interface";
 
 const registerUserIntoDB = async (payload: RegisterUserPayload) => {
-  const { name, email, password, profilePhoto } = payload;
+  const { name, email, password, profilePhoto, role } = payload;
   const isUserExist = await prisma.user.findUnique({
     where: { email },
   });
@@ -19,6 +19,7 @@ const registerUserIntoDB = async (payload: RegisterUserPayload) => {
       name,
       email,
       password: hashedPassword,
+      role,
       profile: {
         create: {
           profilePhoto,

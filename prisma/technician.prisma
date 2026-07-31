@@ -1,0 +1,35 @@
+model TechnicianProfile {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  bio          String?
+  skills       String[]
+  experience   Int      @default(0)
+  hourlyRate   Float
+  location     String?  @db.VarChar(255)
+  avgRating    Float    @default(0)
+
+  services     Service[]
+  availability Availability[]
+  bookings     Booking[] @relation("TechnicianBookings")
+  reviews      Review[]  @relation("TechnicianReviews")
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("technician_profiles")
+}
+
+model Availability {
+  id           String @id @default(uuid())
+  technicianId String
+  technician   TechnicianProfile @relation(fields: [technicianId], references: [id], onDelete: Cascade)
+
+  dayOfWeek    Int
+  startTime    String @db.VarChar(5)
+  endTime      String @db.VarChar(5)
+
+  @@index([technicianId])
+  @@map("availabilities")
+}

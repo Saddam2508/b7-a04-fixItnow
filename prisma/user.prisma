@@ -4,11 +4,17 @@ model User {
   email        String       @unique
   password     String
   activeStatus ActiveStatus @default(UNBAN)
-  role         Role         @default(USER)
+  role         Role         @default(CUSTOMER)
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
   profile      Profile?
 
+  // Customer side relations
+  bookings  Booking[]  @relation("CustomerBookings")
+  reviews   Review[]   @relation("CustomerReviews")
+
+  // Technician side relation (1-1)
+  technicianProfile TechnicianProfile?
+
   @@map("users")
 }
-
