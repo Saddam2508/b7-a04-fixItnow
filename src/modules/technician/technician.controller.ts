@@ -8,6 +8,7 @@ const createTechnicianProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.id as string;
     const payload = req.body;
+
     const technicianProfile =
       await technicianService.createTechnicianProfileIntoDB(userId, payload);
 

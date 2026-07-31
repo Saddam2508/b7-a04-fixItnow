@@ -3,6 +3,7 @@ import httpStatus from "http-status";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { paymentService } from "./payment.service";
+import { Role } from "../../../generated/prisma/enums";
 
 const createPayment = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -21,7 +22,10 @@ const createPayment = catchAsync(
 
 const getAllPayments = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const payments = await paymentService.getAllPaymentsFromDB();
+    const userId = req.user?.id as string;
+    const role = req.user?.role as Role;
+
+    const payments = await paymentService.getAllPaymentsFromDB(userId, role);
 
     sendResponse(res, {
       success: true,
@@ -60,6 +64,21 @@ const getPaymentByBooking = catchAsync(
       statusCode: httpStatus.OK,
       message: "Payment fetched successfully",
       data: { payment },
+    });
+  },
+);
+
+const confirmPayment = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const payload = req.body;
+
+    const confirmedPayment = await paymentService.confirmPaymentInDB(payload);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Payment confirmed successfully",
+      data: { confirmedPayment },
     });
   },
 );
@@ -121,6 +140,7 @@ const deletePayment = catchAsync(
 
 export const paymentController = {
   createPayment,
+  confirmPayment,
   getAllPayments,
   getSinglePayment,
   getPaymentByBooking,

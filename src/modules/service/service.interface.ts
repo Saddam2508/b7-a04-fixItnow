@@ -13,7 +13,7 @@ export type TUpdateService = {
 };
 
 export type TServiceFilters = {
-  categoryId?: string;
+  type?: string; // category name, e.g. "Plumbing"
   location?: string;
   minRating?: number;
 };

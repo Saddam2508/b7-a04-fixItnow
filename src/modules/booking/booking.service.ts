@@ -67,6 +67,50 @@ const updateBookingStatusInDB = async (id: string, payload: TUpdateBookingStatus
   return updatedBooking;
 };
 
+const getBookingsForTechnicianUserFromDB = async (userId: string) => {
+  const technicianProfile = await prisma.technicianProfile.findUnique({
+    where: { userId },
+  });
+
+  if (!technicianProfile) {
+    throw new Error("Technician profile not found for this user");
+  }
+
+  const bookings = await prisma.booking.findMany({
+    where: { technicianId: technicianProfile.id },
+    include: { customer: true, service: true, payment: true, review: true },
+  });
+
+  return bookings;
+};
+
+const updateBookingStatusForTechnicianUserInDB = async (
+  userId: string,
+  bookingId: string,
+  payload: TUpdateBookingStatus,
+) => {
+  const technicianProfile = await prisma.technicianProfile.findUnique({
+    where: { userId },
+  });
+
+  if (!technicianProfile) {
+    throw new Error("Technician profile not found for this user");
+  }
+
+  const booking = await getSingleBookingFromDB(bookingId);
+
+  if (booking.technicianId !== technicianProfile.id) {
+    throw new Error("You are not allowed to update this booking");
+  }
+
+  const updatedBooking = await prisma.booking.update({
+    where: { id: bookingId },
+    data: { status: payload.status },
+  });
+
+  return updatedBooking;
+};
+
 const deleteBookingFromDB = async (id: string) => {
   await getSingleBookingFromDB(id);
 
@@ -79,6 +123,8 @@ export const bookingService = {
   createBookingIntoDB,
   getAllBookingsFromDB,
   getSingleBookingFromDB,
+  getBookingsForTechnicianUserFromDB,
+  updateBookingStatusForTechnicianUserInDB,
   updateBookingInDB,
   updateBookingStatusInDB,
   deleteBookingFromDB,

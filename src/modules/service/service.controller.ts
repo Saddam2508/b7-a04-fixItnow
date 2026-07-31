@@ -8,7 +8,6 @@ const createService = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.id as string;
     const payload = req.body;
-
     const service = await serviceService.createServiceIntoDB(userId, payload);
 
     sendResponse(res, {
@@ -25,7 +24,7 @@ const getAllServices = catchAsync(
     const { type, location, rating } = req.query;
 
     const services = await serviceService.getAllServicesFromDB({
-      categoryId: type as string | undefined,
+      type: type as string | undefined,
       location: location as string | undefined,
       minRating: rating ? Number(rating) : undefined,
     });

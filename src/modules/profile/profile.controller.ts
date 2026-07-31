@@ -2,62 +2,58 @@ import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
-import { reviewService } from "./review.service";
+import { profileService } from "./profile.service";
 
-const createReview = catchAsync(
+const createProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const customerId = req.user?.id as string;
+    const userId = req.user?.id as string;
     const payload = req.body;
 
-    const review = await reviewService.createReviewIntoDB(customerId, payload);
+    const profile = await profileService.createProfileIntoDB(userId, payload);
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
-      message: "Review created successfully",
-      data: { review },
+      message: "Profile created successfully",
+      data: { profile },
     });
   },
 );
 
-const getAllReviews = catchAsync(
+const getAllProfiles = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { technicianId } = req.query;
-
-    const reviews = await reviewService.getAllReviewsFromDB(
-      technicianId as string | undefined,
-    );
+    const profiles = await profileService.getAllProfilesFromDB();
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "Reviews fetched successfully",
-      data: { reviews },
+      message: "Profiles fetched successfully",
+      data: { profiles },
     });
   },
 );
 
-const getSingleReview = catchAsync(
+const getSingleProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
-    const review = await reviewService.getSingleReviewFromDB(id as string);
+    const profile = await profileService.getSingleProfileFromDB(id as string);
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "Review fetched successfully",
-      data: { review },
+      message: "Profile fetched successfully",
+      data: { profile },
     });
   },
 );
 
-const updateReview = catchAsync(
+const updateProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     const payload = req.body;
 
-    const updatedReview = await reviewService.updateReviewInDB(
+    const updatedProfile = await profileService.updateProfileInDB(
       id as string,
       payload,
     );
@@ -65,31 +61,33 @@ const updateReview = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "Review updated successfully",
-      data: { updatedReview },
+      message: "Profile updated successfully",
+      data: { updatedProfile },
     });
   },
 );
 
-const deleteReview = catchAsync(
+const deleteProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
-    const deletedReview = await reviewService.deleteReviewFromDB(id as string);
+    const deletedProfile = await profileService.deleteProfileFromDB(
+      id as string,
+    );
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "Review deleted successfully",
-      data: { deletedReview },
+      message: "Profile deleted successfully",
+      data: { deletedProfile },
     });
   },
 );
 
-export const reviewController = {
-  createReview,
-  getAllReviews,
-  getSingleReview,
-  updateReview,
-  deleteReview,
+export const profileController = {
+  createProfile,
+  getAllProfiles,
+  getSingleProfile,
+  updateProfile,
+  deleteProfile,
 };

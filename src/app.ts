@@ -12,6 +12,10 @@ import { bookingRoutes } from "./modules/booking/booking.route";
 import { paymentRoutes } from "./modules/payment/payment.route";
 import { reviewRoutes } from "./modules/review/review.route";
 import { serviceCategoryRoutes } from "./modules/service-category/serviceCategory.route";
+import { profileRoutes } from "./modules/profile/profile.route";
+import { availabilityRoutes } from "./modules/availability/availability.route";
+import { technicianPanelRoutes } from "./modules/technician-panel/technicianPanel.route";
+import { adminRoutes } from "./modules/admin/admin.route";
 
 const app: Application = express();
 
@@ -37,12 +41,16 @@ app.get("/", (req: Request, res: Response) => {
 // app.post()
 app.use("/api/auth", userRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/profiles", profileRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/categories", serviceCategoryRoutes);
 app.use("/api/technicians", technicianRoutes);
+app.use("/api", availabilityRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/technician", technicianPanelRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.use(notFound);
 

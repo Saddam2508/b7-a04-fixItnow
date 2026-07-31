@@ -25,11 +25,13 @@ const createServiceIntoDB = async (userId: string, payload: TCreateService) => {
 };
 
 const getAllServicesFromDB = async (filters: TServiceFilters) => {
-  const { categoryId, location, minRating } = filters;
+  const { type, location, minRating } = filters;
 
   const services = await prisma.service.findMany({
     where: {
-      ...(categoryId && { categoryId }),
+      ...(type && {
+        category: { name: { equals: type, mode: "insensitive" } },
+      }),
       technician: {
         ...(location && {
           location: { contains: location, mode: "insensitive" },

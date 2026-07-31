@@ -44,6 +44,24 @@ const updateAvailabilityInDB = async (id: string, payload: TUpdateAvailability) 
   return updatedAvailability;
 };
 
+const replaceAvailabilityForTechnicianInDB = async (
+  technicianId: string,
+  slots: TCreateAvailability[],
+) => {
+  const result = await prisma.$transaction([
+    prisma.availability.deleteMany({ where: { technicianId } }),
+    prisma.availability.createMany({
+      data: slots.map((slot) => ({ ...slot, technicianId })),
+    }),
+  ]);
+
+  const availability = await prisma.availability.findMany({
+    where: { technicianId },
+  });
+
+  return availability;
+};
+
 const deleteAvailabilityFromDB = async (id: string) => {
   await getSingleAvailabilityFromDB(id);
 
@@ -56,6 +74,7 @@ export const availabilityService = {
   createAvailabilityIntoDB,
   getAvailabilityForTechnicianFromDB,
   getSingleAvailabilityFromDB,
+  replaceAvailabilityForTechnicianInDB,
   updateAvailabilityInDB,
   deleteAvailabilityFromDB,
 };

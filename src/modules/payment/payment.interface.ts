@@ -1,7 +1,4 @@
-import {
-  PaymentMethod,
-  PaymentStatus,
-} from "../../../generated/prisma/enums";
+import { PaymentMethod, PaymentStatus } from "../../../generated/prisma/enums";
 
 export type TCreatePayment = {
   bookingId: string;
@@ -17,5 +14,11 @@ export type TUpdatePayment = {
 };
 
 export type TUpdatePaymentStatus = {
+  status: PaymentStatus;
+};
+
+export type TConfirmPayment = {
+  bookingId: string;
+  transactionId: string;
   status: PaymentStatus;
 };

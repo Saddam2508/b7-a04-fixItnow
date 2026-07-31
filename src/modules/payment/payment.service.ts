@@ -1,6 +1,7 @@
-import { PaymentStatus } from "../../../generated/prisma/enums";
+import { PaymentStatus, Role } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import {
+  TConfirmPayment,
   TCreatePayment,
   TUpdatePayment,
   TUpdatePaymentStatus,
@@ -20,8 +21,16 @@ const createPaymentIntoDB = async (payload: TCreatePayment) => {
   return payment;
 };
 
-const getAllPaymentsFromDB = async () => {
-  const payments = await prisma.payment.findMany({ include: { booking: true } });
+const getAllPaymentsFromDB = async (userId: string, role: Role) => {
+  const payments = await prisma.payment.findMany({
+    where:
+      role === Role.ADMIN
+        ? {}
+        : role === Role.TECHNICIAN
+          ? { booking: { technician: { userId } } }
+          : { booking: { customerId: userId } },
+    include: { booking: true },
+  });
 
   return payments;
 };
@@ -74,6 +83,27 @@ const updatePaymentStatusInDB = async (id: string, payload: TUpdatePaymentStatus
   return updatedPayment;
 };
 
+const confirmPaymentInDB = async (payload: TConfirmPayment) => {
+  const payment = await prisma.payment.findUnique({
+    where: { bookingId: payload.bookingId },
+  });
+
+  if (!payment) {
+    throw new Error("Payment not found for this booking");
+  }
+
+  const confirmedPayment = await prisma.payment.update({
+    where: { id: payment.id },
+    data: {
+      transactionId: payload.transactionId,
+      status: payload.status,
+      paidAt: payload.status === PaymentStatus.PAID ? new Date() : undefined,
+    },
+  });
+
+  return confirmedPayment;
+};
+
 const deletePaymentFromDB = async (id: string) => {
   await getSinglePaymentFromDB(id);
 
@@ -87,6 +117,7 @@ export const paymentService = {
   getAllPaymentsFromDB,
   getSinglePaymentFromDB,
   getPaymentByBookingFromDB,
+  confirmPaymentInDB,
   updatePaymentInDB,
   updatePaymentStatusInDB,
   deletePaymentFromDB,

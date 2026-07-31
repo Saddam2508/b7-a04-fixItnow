@@ -28,7 +28,9 @@ const getAvailabilityForTechnician = catchAsync(
     const { technicianId } = req.params;
 
     const availability =
-      await availabilityService.getAvailabilityForTechnicianFromDB(technicianId as string);
+      await availabilityService.getAvailabilityForTechnicianFromDB(
+        technicianId as string,
+      );
 
     sendResponse(res, {
       success: true,
@@ -44,10 +46,8 @@ const updateAvailability = catchAsync(
     const { id } = req.params;
     const payload = req.body;
 
-    const updatedAvailability = await availabilityService.updateAvailabilityInDB(
-      id as string,
-      payload,
-    );
+    const updatedAvailability =
+      await availabilityService.updateAvailabilityInDB(id as string, payload);
 
     sendResponse(res, {
       success: true,
@@ -62,7 +62,8 @@ const deleteAvailability = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
-    const deletedAvailability = await availabilityService.deleteAvailabilityFromDB(id as string);
+    const deletedAvailability =
+      await availabilityService.deleteAvailabilityFromDB(id as string);
 
     sendResponse(res, {
       success: true,

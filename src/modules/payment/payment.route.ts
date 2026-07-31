@@ -5,13 +5,15 @@ import { paymentController } from "./payment.controller";
 
 const router = Router();
 
-router.post(
-  "/",
-  auth(Role.CUSTOMER, Role.ADMIN),
-  paymentController.createPayment,
-);
+router.post("/create", auth(Role.CUSTOMER), paymentController.createPayment);
 
-router.get("/", auth(Role.ADMIN), paymentController.getAllPayments);
+router.post("/confirm", paymentController.confirmPayment);
+
+router.get(
+  "/",
+  auth(Role.CUSTOMER, Role.TECHNICIAN, Role.ADMIN),
+  paymentController.getAllPayments,
+);
 
 router.get(
   "/:id",
@@ -25,11 +27,7 @@ router.get(
   paymentController.getPaymentByBooking,
 );
 
-router.patch(
-  "/:id",
-  auth(Role.ADMIN),
-  paymentController.updatePayment,
-);
+router.patch("/:id", auth(Role.ADMIN), paymentController.updatePayment);
 
 router.patch(
   "/:id/status",
