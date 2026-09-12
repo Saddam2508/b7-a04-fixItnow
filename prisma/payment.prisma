@@ -4,6 +4,8 @@ model Payment {
   bookingId     String        @unique
   booking       Booking       @relation(fields: [bookingId], references: [id])
 
+stripeCustomerId  String
+
  userId        String
   user          User          @relation(fields: [userId], references: [id])
 

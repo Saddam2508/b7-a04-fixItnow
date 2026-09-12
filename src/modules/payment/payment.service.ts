@@ -1,5 +1,6 @@
 import { PaymentStatus, Role } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
+import { stripe } from "../../lib/stripe";
 import {
   TConfirmPayment,
   TCreatePayment,
@@ -30,6 +31,27 @@ const createCheckoutSession = async (userId: string) => {
       include: {
         payments: true,
       },
+    });
+    const payment = user.payments.find((payment) => payment.stripeCustomerId);
+
+    let stripeCustomerId = payment?.stripeCustomerId;
+
+    if (!stripeCustomerId) {
+      const customer = await stripe.customers.create({
+        email: user.email,
+        name: user.name,
+        metadata: {
+          userId: user.id,
+        },
+      });
+
+      stripeCustomerId = customer.id;
+    }
+
+    const customer = await stripe.customers.create({
+      email: user.email,
+      name: user.name,
+      metadata: { userId: user.id },
     });
   });
 };

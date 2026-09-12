@@ -3,6 +3,7 @@ import { PaymentMethod, PaymentStatus } from "../../../generated/prisma/enums";
 export type TCreatePayment = {
   bookingId: string;
   userId: string;
+  stripeCustomerId: string;
   amount: number;
   method: PaymentMethod;
   transactionId?: string;
