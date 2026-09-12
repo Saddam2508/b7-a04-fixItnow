@@ -9,6 +9,8 @@ router.post("/create", auth(Role.CUSTOMER), paymentController.createPayment);
 
 router.post("/confirm", paymentController.confirmPayment);
 
+router.post("/checkout", paymentController.creteCheckoutSession);
+
 router.get(
   "/",
   auth(Role.CUSTOMER, Role.TECHNICIAN, Role.ADMIN),

@@ -21,6 +21,19 @@ const createPaymentIntoDB = async (payload: TCreatePayment) => {
   return payment;
 };
 
+const createCheckoutSession = async (userId: string) => {
+  const transactionResult = await prisma.$transaction(async (tx) => {
+    const user = await tx.user.findUniqueOrThrow({
+      where: {
+        id: userId,
+      },
+      include: {
+        payments: true,
+      },
+    });
+  });
+};
+
 const getAllPaymentsFromDB = async (userId: string, role: Role) => {
   const payments = await prisma.payment.findMany({
     where:
@@ -69,7 +82,10 @@ const updatePaymentInDB = async (id: string, payload: TUpdatePayment) => {
   return updatedPayment;
 };
 
-const updatePaymentStatusInDB = async (id: string, payload: TUpdatePaymentStatus) => {
+const updatePaymentStatusInDB = async (
+  id: string,
+  payload: TUpdatePaymentStatus,
+) => {
   await getSinglePaymentFromDB(id);
 
   const updatedPayment = await prisma.payment.update({
@@ -114,6 +130,7 @@ const deletePaymentFromDB = async (id: string) => {
 
 export const paymentService = {
   createPaymentIntoDB,
+  createCheckoutSession,
   getAllPaymentsFromDB,
   getSinglePaymentFromDB,
   getPaymentByBookingFromDB,

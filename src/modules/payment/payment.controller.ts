@@ -20,6 +20,19 @@ const createPayment = catchAsync(
   },
 );
 
+const creteCheckoutSession = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.user?.id;
+    const result = paymentService.createCheckoutSession(userId as string);
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "Checkout create successfully",
+      data: result,
+    });
+  },
+);
+
 const getAllPayments = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.id as string;
@@ -140,6 +153,7 @@ const deletePayment = catchAsync(
 
 export const paymentController = {
   createPayment,
+  creteCheckoutSession,
   confirmPayment,
   getAllPayments,
   getSinglePayment,

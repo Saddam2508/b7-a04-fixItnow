@@ -15,6 +15,7 @@ model User {
 
   // Technician side relation (1-1)
   technicianProfile TechnicianProfile?
+  payments  Payment[]
 
   @@map("users")
 }
