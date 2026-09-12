@@ -1,4 +1,5 @@
 import { PaymentStatus, Role } from "../../../generated/prisma/enums";
+import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { stripe } from "../../lib/stripe";
 import {
@@ -47,12 +48,21 @@ const createCheckoutSession = async (userId: string) => {
 
       stripeCustomerId = customer.id;
     }
-
-    const customer = await stripe.customers.create({
-      email: user.email,
-      name: user.name,
+    const session = await stripe.checkout.sessions.create({
+      line_items: [
+        {
+          price: config.stripe_product_key,
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      customer: stripeCustomerId,
+      payment_method_types: ["card"],
+      success_url: "",
+      cancel_url: "",
       metadata: { userId: user.id },
     });
+    return session.url;
   });
 };
 
