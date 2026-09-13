@@ -58,12 +58,13 @@ const createCheckoutSession = async (userId: string) => {
       mode: "payment",
       customer: stripeCustomerId,
       payment_method_types: ["card"],
-      success_url: "",
-      cancel_url: "",
+      success_url: `${config.app_url}/premium?success=true`,
+      cancel_url: `${config.app_url}/payment?success=false`,
       metadata: { userId: user.id },
     });
     return session.url;
   });
+  return { paymentUrl: transactionResult };
 };
 
 const getAllPaymentsFromDB = async (userId: string, role: Role) => {
