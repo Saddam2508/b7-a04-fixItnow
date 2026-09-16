@@ -15,6 +15,8 @@ router.post(
   paymentController.creteCheckoutSession,
 );
 
+router.post("/webhook", paymentController.handleWebhook);
+
 router.get(
   "/",
   auth(Role.CUSTOMER, Role.TECHNICIAN, Role.ADMIN),

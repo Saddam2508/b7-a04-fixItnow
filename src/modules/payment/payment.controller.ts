@@ -33,6 +33,20 @@ const creteCheckoutSession = catchAsync(
   },
 );
 
+const handleWebhook = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const event = req.body as Buffer;
+    const signature = req.headers["stripe-signature"]!;
+    await paymentService.handleWebhook(event, signature as string);
+    sendResponse(res, {
+      success: true,
+      statusCode: 200,
+      message: "Webhook fetched successfully",
+      data: null,
+    });
+  },
+);
+
 const getAllPayments = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.id as string;
@@ -154,6 +168,7 @@ const deletePayment = catchAsync(
 export const paymentController = {
   createPayment,
   creteCheckoutSession,
+  handleWebhook,
   confirmPayment,
   getAllPayments,
   getSinglePayment,

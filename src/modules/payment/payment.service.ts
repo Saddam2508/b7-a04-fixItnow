@@ -67,6 +67,8 @@ const createCheckoutSession = async (userId: string) => {
   return { paymentUrl: transactionResult };
 };
 
+const handleWebhook = (event: Buffer, signature: string) => {};
+
 const getAllPaymentsFromDB = async (userId: string, role: Role) => {
   const payments = await prisma.payment.findMany({
     where:
@@ -164,6 +166,7 @@ const deletePaymentFromDB = async (id: string) => {
 export const paymentService = {
   createPaymentIntoDB,
   createCheckoutSession,
+  handleWebhook,
   getAllPaymentsFromDB,
   getSinglePaymentFromDB,
   getPaymentByBookingFromDB,
