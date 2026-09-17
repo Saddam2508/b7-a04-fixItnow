@@ -67,7 +67,34 @@ const createCheckoutSession = async (userId: string) => {
   return { paymentUrl: transactionResult };
 };
 
-const handleWebhook = (event: Buffer, signature: string) => {};
+const handleWebhook = (payload: Buffer, signature: string) => {
+  const endpointSecret = config.stripe_webhook_secret;
+
+  const event = stripe.webhooks.constructEvent(
+    payload,
+    signature as string,
+    endpointSecret,
+  );
+
+  // Handle the event
+  switch (event.type) {
+    case "checkout.session.completed":
+      const paymentIntent = event.data.object;
+
+      break;
+    case "customer.subscription.updated":
+      const paymentMethod = event.data.object;
+
+      break;
+
+    case "customer.subscription.deleted":
+      break;
+    default:
+      // Unexpected event type
+      console.log(`Unhandled event type ${event.type}.`);
+      break;
+  }
+};
 
 const getAllPaymentsFromDB = async (userId: string, role: Role) => {
   const payments = await prisma.payment.findMany({
