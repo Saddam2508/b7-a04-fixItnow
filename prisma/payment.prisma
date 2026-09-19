@@ -1,21 +1,23 @@
 model Payment {
-  id            String        @id @default(uuid())
+  id                   String        @id @default(uuid())
 
-  bookingId     String        @unique
-  booking       Booking       @relation(fields: [bookingId], references: [id])
+  bookingId            String?       @unique
+  booking              Booking?      @relation(fields: [bookingId], references: [id])
 
-stripeCustomerId  String
+  stripeCustomerId     String        @unique
+  stripeSubscriptionId String?       @unique
 
- userId        String
-  user          User          @relation(fields: [userId], references: [id])
+  userId               String        @unique
+  user                 User           @relation(fields: [userId], references: [id])
 
-  amount        Float
-  method        PaymentMethod
-  status        PaymentStatus @default(PENDING)
-  transactionId String?       @unique
+  amount               Float
+  method               PaymentMethod
 
-  paidAt        DateTime?
-  createdAt     DateTime      @default(now())
+  status               PaymentStatus @default(PENDING)
+
+  transactionId        String?       @unique
+  paidAt               DateTime?
+  createdAt             DateTime      @default(now())
 
   @@map("payments")
 }

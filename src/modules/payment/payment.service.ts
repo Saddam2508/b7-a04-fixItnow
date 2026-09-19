@@ -1,3 +1,4 @@
+import { Stripe } from "stripe";
 import { PaymentStatus, Role } from "../../../generated/prisma/enums";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
@@ -67,30 +68,68 @@ const createCheckoutSession = async (userId: string) => {
   return { paymentUrl: transactionResult };
 };
 
-const handleWebhook = (payload: Buffer, signature: string) => {
+const handleWebhook = async (payload: Buffer, signature: string) => {
   const endpointSecret = config.stripe_webhook_secret;
 
   const event = stripe.webhooks.constructEvent(
     payload,
-    signature as string,
+    signature,
     endpointSecret,
   );
 
-  // Handle the event
   switch (event.type) {
-    case "checkout.session.completed":
-      const paymentIntent = event.data.object;
+    case "checkout.session.completed": {
+      const session = event.data.object as Stripe.Checkout.Session;
+
+      const userId = session.metadata?.userId;
+
+      const stripeCustomerId =
+        typeof session.customer === "string"
+          ? session.customer
+          : session.customer?.id;
+
+      const paymentIntentId =
+        typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : session.payment_intent?.id;
+
+      if (!userId || !stripeCustomerId || !paymentIntentId) {
+        throw new Error("Payment data is incomplete");
+      }
+
+      if (session.payment_status !== "paid") {
+        throw new Error("Payment is not completed");
+      }
+
+      const payment = await prisma.payment.upsert({
+        where: {
+          userId,
+        },
+
+        create: {
+          userId,
+          stripeCustomerId,
+          amount: (session.amount_total ?? 0) / 100,
+          method: "STRIPE",
+          status: "PAID",
+          transactionId: paymentIntentId,
+          paidAt: new Date(),
+        },
+
+        update: {
+          stripeCustomerId,
+          amount: (session.amount_total ?? 0) / 100,
+          method: "STRIPE",
+          status: "PAID",
+          transactionId: paymentIntentId,
+          paidAt: new Date(),
+        },
+      });
 
       break;
-    case "customer.subscription.updated":
-      const paymentMethod = event.data.object;
+    }
 
-      break;
-
-    case "customer.subscription.deleted":
-      break;
     default:
-      // Unexpected event type
       console.log(`Unhandled event type ${event.type}.`);
       break;
   }
