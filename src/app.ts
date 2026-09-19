@@ -16,7 +16,6 @@ import { profileRoutes } from "./modules/profile/profile.route";
 import { availabilityRoutes } from "./modules/availability/availability.route";
 import { technicianPanelRoutes } from "./modules/technician-panel/technicianPanel.route";
 import { adminRoutes } from "./modules/admin/admin.route";
-import { stripe } from "./lib/stripe";
 
 const app: Application = express();
 
