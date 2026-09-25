@@ -10,13 +10,13 @@ router.post("/register", userController.registerUser);
 
 router.get(
   "/me",
-  auth(Role.ADMIN, Role.USER, Role.TECHNICIAN),
+  auth(Role.ADMIN, Role.CUSTOMER, Role.TECHNICIAN),
   userController.getMyProfile,
 );
 
 router.put(
   "/my-profile",
-  auth(Role.ADMIN, Role.USER, Role.TECHNICIAN),
+  auth(Role.ADMIN, Role.CUSTOMER, Role.TECHNICIAN),
   userController.updateMyProfile,
 );
 
