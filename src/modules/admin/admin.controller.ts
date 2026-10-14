@@ -23,7 +23,10 @@ const updateUserStatus = catchAsync(
     const { id } = req.params;
     const payload = req.body;
 
-    const updatedUser = await adminService.updateUserStatusInDB(id as string, payload);
+    const updatedUser = await adminService.updateUserStatusInDB(
+      id as string,
+      payload,
+    );
 
     sendResponse(res, {
       success: true,
@@ -49,7 +52,8 @@ const getAllBookings = catchAsync(
 
 const getAllCategories = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const categories = await serviceCategoryService.getAllServiceCategoriesFromDB();
+    const categories =
+      await serviceCategoryService.getAllServiceCategoriesFromDB();
 
     sendResponse(res, {
       success: true,
@@ -64,7 +68,8 @@ const createCategory = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
 
-    const category = await serviceCategoryService.createServiceCategoryIntoDB(payload);
+    const category =
+      await serviceCategoryService.createServiceCategoryIntoDB(payload);
 
     sendResponse(res, {
       success: true,
