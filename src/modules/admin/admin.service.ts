@@ -1,5 +1,5 @@
 import { prisma } from "../../lib/prisma";
-import { TUpdateUserStatus } from "./admin.interface";
+import type { TUpdateUserStatus } from "./admin.interface";
 
 const getAllUsersFromDB = async () => {
   const users = await prisma.user.findMany({
@@ -28,7 +28,13 @@ const updateUserStatusInDB = async (id: string, payload: TUpdateUserStatus) => {
 
 const getAllBookingsFromDB = async () => {
   const bookings = await prisma.booking.findMany({
-    include: { customer: true, technician: true, service: true, payment: true, review: true },
+    include: {
+      customer: true,
+      technician: true,
+      service: true,
+      payment: true,
+      review: true,
+    },
   });
 
   return bookings;

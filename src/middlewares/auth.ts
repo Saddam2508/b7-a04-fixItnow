@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from "express";
-import { JwtPayload } from "jsonwebtoken";
+import type { NextFunction, Request, Response } from "express";
+import type{ JwtPayload } from "jsonwebtoken";
 
 import config from "../config";
 import { catchAsync } from "../utils/catchAsync";
