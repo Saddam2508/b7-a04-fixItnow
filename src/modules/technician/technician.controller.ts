@@ -56,13 +56,11 @@ const updateTechnicianProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     const payload = req.body;
-
     const updatedTechnician =
       await technicianService.updateTechnicianProfileInDB(
         id as string,
         payload,
       );
-
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,

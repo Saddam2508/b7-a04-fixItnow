@@ -29,3 +29,13 @@ enum PaymentMethod {
   STRIPE
   SSLCOMMERZ
 }
+
+enum WeekDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}

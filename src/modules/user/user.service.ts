@@ -2,43 +2,64 @@ import bcrypt from "bcryptjs";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import { RegisterUserPayload } from "./user.interface";
+import { Role } from "../../../generated/prisma/enums";
 
 const registerUserIntoDB = async (payload: RegisterUserPayload) => {
   const { name, email, password, profilePhoto, role } = payload;
+
   const isUserExist = await prisma.user.findUnique({
     where: { email },
   });
+
+  if (isUserExist) {
+    throw new Error("User already exists");
+  }
 
   const hashedPassword = await bcrypt.hash(
     password,
     Number(config.bcrypt_salt_rounds),
   );
 
-  const createdUser = await prisma.user.create({
-    data: {
-      name,
-      email,
-      password: hashedPassword,
-      role,
-      profile: {
-        create: {
-          profilePhoto,
+  const user = await prisma.$transaction(async (tx) => {
+    const createdUser = await tx.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role,
+        profile: {
+          create: {
+            ...(profilePhoto !== undefined && { profilePhoto }),
+          },
         },
       },
-    },
-  });
+    });
 
-  const user = await prisma.user.findUnique({
-    where: {
-      id: createdUser.id,
-      email: createdUser.email || email,
-    },
-    omit: {
-      password: true,
-    },
-    include: {
-      profile: true,
-    },
+    if (role === Role.TECHNICIAN) {
+      await tx.technicianProfile.create({
+        data: {
+          userId: createdUser.id,
+          bio: null,
+          skills: [],
+          experience: 0,
+          hourlyRate: 0,
+          location: null,
+        },
+      });
+    }
+
+    return tx.user.findUniqueOrThrow({
+      where: {
+        id: createdUser.id,
+      },
+      omit: {
+        password: true,
+      },
+      include: {
+        profile: true,
+        technicianProfile: true,
+      },
+    });
   });
 
   return user;

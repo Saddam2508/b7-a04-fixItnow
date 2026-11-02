@@ -24,9 +24,12 @@ const getAllServices = catchAsync(
     const { type, location, rating } = req.query;
 
     const services = await serviceService.getAllServicesFromDB({
-      type: type as string | undefined,
-      location: location as string | undefined,
-      minRating: rating ? Number(rating) : undefined,
+      ...(typeof type === "string" && { type }),
+      ...(typeof location === "string" && { location }),
+      ...(typeof rating === "string" &&
+        !Number.isNaN(Number(rating)) && {
+          minRating: Number(rating),
+        }),
     });
 
     sendResponse(res, {
@@ -38,10 +41,22 @@ const getAllServices = catchAsync(
   },
 );
 
+const getMyServices = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.id as string;
+
+  const services = await serviceService.getMyServicesFromDB(userId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "My services fetched successfully",
+    data: { services },
+  });
+});
+
 const getSingleService = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
-
     const service = await serviceService.getSingleServiceFromDB(id as string);
 
     sendResponse(res, {
@@ -92,6 +107,7 @@ const deleteService = catchAsync(
 export const serviceController = {
   createService,
   getAllServices,
+  getMyServices,
   getSingleService,
   updateService,
   deleteService,

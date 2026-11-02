@@ -45,6 +45,31 @@ const getAllServicesFromDB = async (filters: TServiceFilters) => {
   return services;
 };
 
+const getMyServicesFromDB = async (userId: string) => {
+  const technicianProfile = await prisma.technicianProfile.findUnique({
+    where: { userId },
+  });
+
+  if (!technicianProfile) {
+    throw new Error("Technician profile not found for this user");
+  }
+
+  const services = await prisma.service.findMany({
+    where: {
+      technicianId: technicianProfile.id,
+    },
+    include: {
+      technician: true,
+      category: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return services;
+};
+
 const getSingleServiceFromDB = async (id: string) => {
   const service = await prisma.service.findUnique({
     where: { id },
@@ -80,6 +105,7 @@ const deleteServiceFromDB = async (id: string) => {
 export const serviceService = {
   createServiceIntoDB,
   getAllServicesFromDB,
+  getMyServicesFromDB,
   getSingleServiceFromDB,
   updateServiceInDB,
   deleteServiceFromDB,
