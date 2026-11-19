@@ -1,3 +1,4 @@
+import { BookingStatus, PaymentStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import {
   TCreateTechnicianProfile,
@@ -273,6 +274,74 @@ const deleteTechnicianProfileFromDB = async (id: string) => {
   return deletedTechnician;
 };
 
+const getTechnicianDashboardStatsFromDB = async (userId: string) => {
+  const technicianProfile = await prisma.technicianProfile.findUnique({
+    where: { userId },
+    select: { id: true },
+  });
+
+  if (!technicianProfile) {
+    throw new Error("Technician profile not found");
+  }
+
+  const technicianId = technicianProfile.id;
+  const now = new Date();
+
+  const [
+    totalServices,
+    pendingRequests,
+    upcomingJobs,
+    completedJobs,
+    earnings,
+  ] = await Promise.all([
+    prisma.service.count({
+      where: { technicianId },
+    }),
+
+    prisma.booking.count({
+      where: {
+        technicianId,
+        status: BookingStatus.PENDING,
+      },
+    }),
+
+    prisma.booking.count({
+      where: {
+        technicianId,
+        status: BookingStatus.ACCEPTED,
+        scheduledAt: { gte: now },
+      },
+    }),
+
+    prisma.booking.count({
+      where: {
+        technicianId,
+        status: BookingStatus.COMPLETED,
+      },
+    }),
+
+    prisma.payment.aggregate({
+      where: {
+        status: PaymentStatus.PAID,
+        booking: {
+          is: { technicianId },
+        },
+      },
+      _sum: {
+        amount: true,
+      },
+    }),
+  ]);
+
+  return {
+    totalServices,
+    pendingRequests,
+    upcomingJobs,
+    completedJobs,
+    totalEarnings: earnings._sum.amount ?? 0,
+  };
+};
+
 // ============================================
 // Export Technician Services
 // ============================================
@@ -285,4 +354,5 @@ export const technicianService = {
   updateTechnicianProfileByUserIdInDB,
   updateTechnicianProfileInDB,
   deleteTechnicianProfileFromDB,
+  getTechnicianDashboardStatsFromDB,
 };

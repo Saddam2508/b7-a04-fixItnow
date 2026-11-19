@@ -13,6 +13,11 @@ router.post(
 
 router.get("/", technicianController.getAllTechnicianProfiles);
 
+router.get(
+  "/dashboard/stats",
+  auth(Role.TECHNICIAN),
+  technicianController.getTechnicianDashboardStats,
+);
 router.get("/:id", technicianController.getSingleTechnicianProfile);
 
 router.patch(

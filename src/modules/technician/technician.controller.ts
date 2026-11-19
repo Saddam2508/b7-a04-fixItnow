@@ -86,10 +86,27 @@ const deleteTechnicianProfile = catchAsync(
   },
 );
 
+const getTechnicianDashboardStats = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = req.user?.id as string;
+
+    const stats =
+      await technicianService.getTechnicianDashboardStatsFromDB(userId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Technician dashboard statistics fetched successfully",
+      data: { stats },
+    });
+  },
+);
+
 export const technicianController = {
   createTechnicianProfile,
   getAllTechnicianProfiles,
   getSingleTechnicianProfile,
   updateTechnicianProfile,
   deleteTechnicianProfile,
+  getTechnicianDashboardStats,
 };
