@@ -164,6 +164,50 @@ const deletePayment = catchAsync(
     });
   },
 );
+const createBookingCheckoutSession = catchAsync(async (req, res) => {
+  const { bookingId } = req.params;
+  const userId = req.user!.id;
+
+  const result = await paymentService.createBookingCheckoutSession(
+    bookingId as string,
+    userId,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Checkout session created successfully",
+    data: result,
+  });
+});
+
+const verifyBookingCheckoutSession = catchAsync(
+  async (req: Request, res: Response) => {
+    const sessionId = req.query.session_id;
+
+    if (typeof sessionId !== "string" || !sessionId.trim()) {
+      throw new Error("Valid Stripe session ID is required");
+    }
+
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new Error("User id not found");
+    }
+
+    const result = await paymentService.verifyBookingCheckoutSession(
+      sessionId,
+      userId,
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: 200,
+      message: result.message ?? "Payment verification completed",
+      data: result,
+    });
+  },
+);
 
 export const paymentController = {
   createPayment,
@@ -176,4 +220,6 @@ export const paymentController = {
   updatePayment,
   updatePaymentStatus,
   deletePayment,
+  createBookingCheckoutSession,
+  verifyBookingCheckoutSession,
 };

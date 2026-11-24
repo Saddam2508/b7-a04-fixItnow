@@ -24,3 +24,7 @@ export type TConfirmPayment = {
   transactionId: string;
   status: PaymentStatus;
 };
+
+export type TCreateBookingCheckout = {
+  bookingId: string;
+};

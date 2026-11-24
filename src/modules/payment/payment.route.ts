@@ -16,11 +16,22 @@ router.post(
 );
 
 router.post("/webhook", paymentController.handleWebhook);
+router.post(
+  "/checkout/:bookingId",
+  auth(Role.CUSTOMER),
+  paymentController.createBookingCheckoutSession,
+);
 
 router.get(
   "/",
   auth(Role.CUSTOMER, Role.TECHNICIAN, Role.ADMIN),
   paymentController.getAllPayments,
+);
+
+router.get(
+  "/verify-session",
+  auth(Role.CUSTOMER),
+  paymentController.verifyBookingCheckoutSession,
 );
 
 router.get(

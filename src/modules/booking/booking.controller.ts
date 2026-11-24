@@ -3,6 +3,7 @@ import httpStatus from "http-status";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { bookingService } from "./booking.service";
+import { Role } from "../../../generated/prisma/enums";
 
 const createBooking = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -23,38 +24,48 @@ const createBooking = catchAsync(
   },
 );
 
-const getAllBookings = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { customerId, technicianId } = req.query;
+const getAllBookings = catchAsync(async (req, res) => {
+  const userId = req.user!.id;
+  const role = req.user!.role;
 
-    const bookings = await bookingService.getAllBookingsFromDB(
-      customerId as string | undefined,
-      technicianId as string | undefined,
-    );
+  let bookings;
 
-    sendResponse(res, {
-      success: true,
-      statusCode: httpStatus.OK,
-      message: "Bookings fetched successfully",
-      data: { bookings },
-    });
-  },
-);
+  if (role === Role.CUSTOMER) {
+    bookings = await bookingService.getBookingsForCustomerUserFromDB(userId);
+  } else if (role === Role.TECHNICIAN) {
+    bookings = await bookingService.getBookingsForTechnicianUserFromDB(userId);
+  } else if (role === Role.ADMIN) {
+    bookings = await bookingService.getAllBookingsFromDB();
+  } else {
+    throw new Error("You are not allowed to access bookings");
+  }
 
-const getSingleBooking = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Bookings fetched successfully",
+    data: { bookings },
+  });
+});
 
-    const booking = await bookingService.getSingleBookingFromDB(id as string);
+const getSingleBooking = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user!.id;
+  const role = req.user!.role;
 
-    sendResponse(res, {
-      success: true,
-      statusCode: httpStatus.OK,
-      message: "Booking fetched successfully",
-      data: { booking },
-    });
-  },
-);
+  const booking = await bookingService.getSingleBookingForUserFromDB(
+    id as string,
+    userId,
+    role,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Booking fetched successfully",
+    data: { booking },
+  });
+});
 
 const updateBooking = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -111,6 +122,24 @@ const deleteBooking = catchAsync(
   },
 );
 
+const cancelBooking = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user!.id;
+
+  const updatedBooking =
+    await bookingService.cancelBookingForCustomerUserFromDB(
+      id as string,
+      userId,
+    );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Booking cancelled successfully",
+    data: { updatedBooking },
+  });
+});
+
 export const bookingController = {
   createBooking,
   getAllBookings,
@@ -118,4 +147,5 @@ export const bookingController = {
   updateBooking,
   updateBookingStatus,
   deleteBooking,
+  cancelBooking,
 };

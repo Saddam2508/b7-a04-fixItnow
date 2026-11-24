@@ -26,6 +26,12 @@ router.patch(
 );
 
 router.patch(
+  "/:id/cancel",
+  auth(Role.CUSTOMER),
+  bookingController.cancelBooking,
+);
+
+router.patch(
   "/:id/status",
   auth(Role.TECHNICIAN, Role.ADMIN),
   bookingController.updateBookingStatus,
